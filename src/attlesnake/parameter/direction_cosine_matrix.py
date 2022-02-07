@@ -21,6 +21,13 @@ class DCM(base.BaseAttitudeParameter):
             # (i.e. that columns are orthonormal with determinant +1)
             self.array = np.array(array_3x3)
 
+    def __repr__(self):
+        return (
+            f"{round(self.array[0,0], 4)},\t{round(self.array[0,1], 4)},\t{round(self.array[0,2], 4)}\n"
+            f"{round(self.array[1,0], 4)},\t{round(self.array[1,1], 4)},\t{round(self.array[1,2], 4)}\n"
+            f"{round(self.array[2,0], 4)},\t{round(self.array[2,1], 4)},\t{round(self.array[2,2], 4)}"
+        )
+
     @classmethod
     def from_ea321(
         cls, ea_321: "euler_angle.EulerAngle321"
