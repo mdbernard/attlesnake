@@ -6,4 +6,6 @@ A Python library for handling rigid body attitude dynamics (tailored for spacecr
 
 Install with pip:
 
-`$ ``pip install attlesnake`
+```bash
+pip install attlesnake
+```
