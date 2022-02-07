@@ -22,7 +22,7 @@ class DCM(base.BaseAttitudeParameter):
             self.array = np.array(array_3x3)
 
     @classmethod
-    def from_321_euler_angles(
+    def from_ea321(
         cls, ea_321: "euler_angle.EulerAngle321"
     ) -> None:
         """
@@ -51,7 +51,7 @@ class DCM(base.BaseAttitudeParameter):
         return cls(array)
 
     @classmethod
-    def from_313_euler_angles(
+    def from_ea313(
         cls, ea_313: "euler_angle.EulerAngle313"
     ) -> "DCM":
         """
