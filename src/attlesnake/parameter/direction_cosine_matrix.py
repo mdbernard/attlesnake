@@ -4,8 +4,8 @@ from typing import Optional
 
 import numpy as np
 
-import attitude.parameter.base as base
-import attitude.parameter.euler_angle as euler_angle
+import attlesnake.parameter.base as base
+import attlesnake.parameter.euler_angle as euler_angle
 
 
 class DCM(base.BaseAttitudeParameter):

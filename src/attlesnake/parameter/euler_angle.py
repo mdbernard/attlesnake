@@ -2,9 +2,9 @@
 
 import numpy as np
 
-import attitude.parameter.base as base
-import attitude.parameter.constants as constants
-import attitude.parameter.direction_cosine_matrix as direction_cosine_matrix
+import attlesnake.parameter.base as base
+import attlesnake.parameter.constants as constants
+import attlesnake.parameter.direction_cosine_matrix as direction_cosine_matrix
 
 
 class BaseEulerAngle(base.BaseAttitudeParameter):
