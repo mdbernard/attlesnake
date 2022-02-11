@@ -6,6 +6,7 @@ import numpy as np
 
 import attlesnake.parameter.base as base
 import attlesnake.parameter.euler_angle as euler_angle
+import attlesnake.parameter.quaternion as quaternion
 
 
 class DCM(base.BaseAttitudeParameter):
@@ -22,11 +23,7 @@ class DCM(base.BaseAttitudeParameter):
             self.array = np.array(array_3x3)
 
     def __repr__(self):
-        return (
-            f"{round(self.array[0,0], 4)},\t{round(self.array[0,1], 4)},\t{round(self.array[0,2], 4)}\n"
-            f"{round(self.array[1,0], 4)},\t{round(self.array[1,1], 4)},\t{round(self.array[1,2], 4)}\n"
-            f"{round(self.array[2,0], 4)},\t{round(self.array[2,1], 4)},\t{round(self.array[2,2], 4)}"
-        )
+        return np.array_str(self.array, precision=4)
 
     @classmethod
     def from_ea321(
@@ -82,6 +79,27 @@ class DCM(base.BaseAttitudeParameter):
                 np.sin(a2)*np.sin(a1),
                 -np.sin(a2)*np.cos(a1),
                 np.cos(a2)
+            ]
+        ])
+        return cls(array)
+
+    @classmethod
+    def from_quaternion(cls, q: "quaternion.Quaternion") -> "DCM":
+        array = np.array([
+            [
+                q.s**2 + q.v1**2 - q.v2**2 - q.v3**2,
+                2*(q.v1*q.v2 + q.s*q.v3),
+                2*(q.v1*q.v3 - q.s*q.v2)
+            ],
+            [
+                2*(q.v1*q.v2 - q.s*q.v3),
+                q.s**2 - q.v1**2 + q.v2**2 - q.v3**2,
+                2*(q.v2*q.v3 + q.s*q.v1)
+            ],
+            [
+                2*(q.v1*q.v3 + q.s*q.v2),
+                2*(q.v2*q.v3 - q.s*q.v1),
+                q.s**2 - q.v1**2 - q.v2**2 + q.v3**2
             ]
         ])
         return cls(array)
