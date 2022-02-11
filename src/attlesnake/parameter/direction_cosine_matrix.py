@@ -22,8 +22,19 @@ class DCM(base.BaseAttitudeParameter):
             # (i.e. that columns are orthonormal with determinant +1)
             self.array = np.array(array_3x3)
 
+    def __matmul__(self, other: "DCM") -> "DCM":
+        """DCM composition (real matrix multiplication)."""
+        return DCM(self.array @ other.array)
+
     def __repr__(self):
         return np.array_str(self.array, precision=4)
+
+    def inverse(self) -> "DCM":
+        """
+        Return the inverse DCM, without modifying the
+        original DCM.
+        """
+        return DCM(np.transpose(self.array))
 
     @classmethod
     def from_ea321(

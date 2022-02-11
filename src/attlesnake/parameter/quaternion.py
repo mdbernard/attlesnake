@@ -10,7 +10,15 @@ import attlesnake.parameter.principal_rotation_vector as principal_rotation_vect
 
 
 class Quaternion(base.BaseAttitudeParameter):
-    """Quaternion attitude parameter."""
+    """
+    Quaternion attitude parameter.
+
+    Conventional usage would denote the quaternion transforming
+    the inertial (N) frame into the body (B) frame as q_BN.
+    To chain frame transformations, say from N to B to F,
+    composition should be done from right to left, matching
+    DCM composition: q_FN = q_FB @ q_BN.
+    """
 
     def __init__(
         self,
@@ -31,9 +39,57 @@ class Quaternion(base.BaseAttitudeParameter):
             f"({self.s:.4f}, {self.v1:.4f}, {self.v2:.4f}, {self.v3:.4f})"
         )
 
+    # TODO keep only the faster of these two composition operators
+    def __mul__(self, other: "Quaternion") -> "Quaternion":
+        """Quaternion composition."""
+        q1 = self
+        q2 = other
+        Q = np.array([
+            [q1.s, -q1.v1, -q1.v2, -q1.v3],
+            [q1.v1, q1.s, q1.v3, -q1.v2],
+            [q1.v2, -q1.v3, q1.s, q1.v1],
+            [q1.v3, q1.v2, -q1.v1, q1.s]
+        ])
+        q = Quaternion(*(Q @ q2.q))
+        q._apply_constraint()
+        q._minimize_path()
+        return q
+
+    def __matmul__(self, other: "Quaternion") -> "Quaternion":
+        """Quaternion composition."""
+        q1 = self
+        q2 = other
+        s = q1.s*q2.s - np.dot(q2.v, q1.v)
+        v1, v2, v3 = q1.s*q2.v + q2.s*q1.v - np.cross(q1.v, q2.v)
+        q = Quaternion(s, v1, v2, v3)
+        q._apply_constraint()
+        q._minimize_path()
+        return q
+
     def _apply_constraint(self) -> None:
         """Enforce the unit quaternion constraint."""
         self.s, self.v1, self.v2, self.v3 = self.q/np.linalg.norm(self.q)
+
+    def _minimize_path(self) -> None:
+        """
+        Convert the quaternion into the quaternion denoting the same
+        final orientation relative to the initial orientation, but with
+        the shorter path. Two quaternions Q and -Q denote the equivalent
+        orientation, but the one with the positive scalar part denotes
+        the shorter path.
+        """
+        if self.s < 0:
+            self.s *= -1
+            self.v1 *= -1
+            self.v2 *= -1
+            self.v3 *= -1
+
+    def inverse(self) -> "Quaternion":
+        """
+        Return the inverse of a quaternion, without modifying the
+        original quaternion.
+        """
+        return Quaternion(self.s, *(-self.v))
 
     @property
     def q(self) -> np.ndarray:
@@ -86,12 +142,6 @@ class Quaternion(base.BaseAttitudeParameter):
             s = sv3/v3
             v1 = v3v1/v3
             v2 = v2v3/v3
-
-        if s < 0:
-            s *= -1
-            v1 *= -1
-            v2 *= -1
-            v3 *= -1
 
         quat = cls(s, v1, v2, v3)
         quat._apply_constraint()
