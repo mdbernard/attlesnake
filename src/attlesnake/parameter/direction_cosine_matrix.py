@@ -7,6 +7,8 @@ import numpy as np
 import attlesnake.parameter.base as base
 import attlesnake.parameter.euler_angle as euler_angle
 import attlesnake.parameter.quaternion as quaternion
+import attlesnake.parameter.rodrigues as rodrigues
+import attlesnake.util as util
 
 
 class DCM(base.BaseAttitudeParameter):
@@ -114,3 +116,13 @@ class DCM(base.BaseAttitudeParameter):
             ]
         ])
         return cls(array)
+
+    @classmethod
+    def from_crp(cls, crp: "rodrigues.CRP") -> "DCM":
+        coeff = 1/(1 + np.inner(crp.vector, crp.vector))
+        C = coeff*(
+            (1 - np.inner(crp.vector, crp.vector))*np.eye(3)
+            + 2*np.outer(crp.vector, crp.vector)
+            - 2*util.cross_matrix(crp.vector)
+        )
+        return cls(C)

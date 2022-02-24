@@ -7,6 +7,7 @@ import numpy as np
 import attlesnake.parameter.base as base
 import attlesnake.parameter.direction_cosine_matrix as direction_cosine_matrix
 import attlesnake.parameter.principal_rotation_vector as principal_rotation_vector
+import attlesnake.parameter.rodrigues as rodrigues
 
 
 class Quaternion(base.BaseAttitudeParameter):
@@ -154,6 +155,16 @@ class Quaternion(base.BaseAttitudeParameter):
         qv1 = prv.e1*np.sin(prv.angle/2)
         qv2 = prv.e2*np.sin(prv.angle/2)
         qv3 = prv.e3*np.sin(prv.angle/2)
+        quat = cls(qs, qv1, qv2, qv3)
+        quat._apply_constraint()
+        return quat
+
+    @classmethod
+    def from_crp(cls, crp: "rodrigues.CRP") -> "Quaternion":
+        qs = 1/(1 + np.dot(crp.vector, crp.vector))**0.5
+        qv1 = crp.r1*qs
+        qv2 = crp.r2*qs
+        qv3 = crp.r3*qs
         quat = cls(qs, qv1, qv2, qv3)
         quat._apply_constraint()
         return quat
